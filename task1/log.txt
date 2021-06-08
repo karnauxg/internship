@@ -1,0 +1,11 @@
+commit e937545776e04fa37e35b51943b02a6dda3c3421
+Author: kar <karnauxg@gmail.com>
+Date:   Tue Jun 8 23:36:21 2021 +0300
+
+    add status.txt
+
+commit ba700e65c5ce0ee0f217dbbb17c6aa891be13868
+Author: kar <karnauxg@gmail.com>
+Date:   Tue Jun 8 23:30:12 2021 +0300
+
+    add .gitignore

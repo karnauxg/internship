@@ -1,13 +1,2 @@
 # Nginx
 DEVOPS=EnvFromFile
-
-# database
-MYSQL_DATABASE=internship
-MYSQL_USER=user
-MYSQL_PASSWORD=user
-MYSQL_ROOT_PASSWORD=user
-
-# phpmyadmin
-PMA_USER=user
-PMA_PASSWORD=user
-PHP_UPLOAD_MAX_FILESIZE=100MB

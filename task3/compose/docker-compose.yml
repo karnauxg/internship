@@ -29,7 +29,7 @@ services:
     ports:
       - "1111:80"
     env_file:
-      - "envConfig"
+      - "secret"
     volumes:
       - ./db:/var/lib/mysql
     depends_on:
@@ -40,7 +40,7 @@ services:
     container_name: db
     # restart: always
     env_file:
-      - "envConfig"
+      - "secret"
     ports:
       - '3306:3306'
     expose:

@@ -1,0 +1,34 @@
+docker ps	                        List running containers
+docker ps -a	                    List all containers
+docker ps -s	                    List running containers (with CPU / memory)
+docker images	                    List all images
+docker exec -it <container> bash	Connecting to container
+docker logs <container>	            Shows container's console log
+docker stop <container>	            Stop a container
+docker restart <container>	        Restart a container
+docker rm <container>	            Remove a container
+docker port <container>	            Shows container's port mapping
+docker top <container>	            List processes
+docker kill <container>	            Kill a container
+
+Create and run a container in background
+$ docker run -d -p 80:80 docker/getting-started
+
+Create and run a container in foreground
+$ docker run -it -p 8001:8080 --name my-nginx nginx
+
+ARG - during build time ( --build-arg <VarName>=<Value> )
+ENV - variable during run time ( -e <VarName>="Value" )
+
+
+Docker-compose:
+-Сборка проекта. ( docker-compose build )
+-Запуск проекта. ( docker-compose up OR docker-compose up -d )
+-останавливать и удалять контейнеры. ( docker-compose down )
+-выводит журналы сервисов. ( docker-compose logs -f [service name] )
+-вывести список контейнеров. ( docker-compose ps )
+-команда позволяет выполнить команду в выполняющемся контейнере. ( docker-compose exec [service name] [command] )
+    примерdocker-compose exec server ls.
+-вывести список образов. ( docker-compose images)
+
+

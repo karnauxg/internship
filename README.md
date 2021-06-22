@@ -11,3 +11,7 @@
 * Build own nginx docker image use clear basic images with env during runtime.
 * Created an automatic deployment for each push to GitHub.
 * Created Docker-compose
+
+### Task 4: Ansible
+* 
+

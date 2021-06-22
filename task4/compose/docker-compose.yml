@@ -1,0 +1,41 @@
+version: '3.3'
+
+services:
+  webpages:
+    image: ivoitukh/mywebapp:v1
+    environment:
+      DEVOPS: Task4
+    ports:
+      # - '80'  # auto-open port in host-side
+      - "8080:80"
+    deploy:
+      replicas: 1
+
+  phpadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: myadmin
+    links:
+      - database:internship
+    ports:
+      - "1111:80"
+    env_file:
+      - "secret"
+    volumes:
+      - ./db:/var/lib/mysql
+    depends_on:
+      - database
+
+  database:
+    image: mysql:5.7
+    container_name: db
+    # restart: always
+    env_file:
+      - "secret"
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - ./db:/var/lib/mysql
+    
+  

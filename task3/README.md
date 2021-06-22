@@ -9,6 +9,7 @@
 3. Create your Dockerfile from clear basic images. Print environment variable with the value on a web page in run time - *Dockerfile*
 > docker build -t mywebapp:v1 .
 >> docker run -e DEVOPS='YourName'  -d -p 8080:80 --name mywebapp mywebapp:v1 
+>>> OR docker run -d --rm -p 8080:80 --name mywebapp mywebapp:v1 
 4. Push my image to DockerHub
 > docker login
 >> docker tag mywebapp:v1 mywebapp:v1

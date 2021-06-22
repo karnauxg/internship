@@ -1,0 +1,25 @@
+# Example using include_filters and exclude_filters to compose the inventory.
+plugin: aws_ec2
+regions:
+  - us-east-2
+  # - us-west-1
+include_filters:
+- tag:Name:
+  - 'iv-doc'
+# - tag:Name:
+#   - 'iv-doc12'
+# exclude_filters:
+# - tag:Name:
+#   - 'my_first_tag'
+filters:
+  # All instances with their `Environment` tag set to `dev`
+  # tag:Environment: dev
+  # # All dev and QA hosts
+  # tag:Environment:
+  #   - dev
+  #   - qa
+  instance.group-id: sg-0dfbf9c7b87ad6ec2
+compose:
+  # Use the private IP address to connect to the host
+  # (note: this does not modify inventory_hostname, which is set via I(hostnames))
+  ansible_host: public_ip_address

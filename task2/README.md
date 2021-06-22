@@ -17,3 +17,5 @@
 * Were created: 2 VPC, 2 SG, 2 Public Subnets, 2 EC2, 2 RT, 2 IGW, 1 pireeng conaction
 * You can easily share the date and ping each other between in different the VPC
 * Bach script install nginx and start service. Script can execute for EC2 like: instance settings-edit user data OR use command: ssh root@publicIP bash < installNginx.sh
+* Copy from local to SSH-PC <scp -i "key/key-pair.pem" /home/localUser/instructure/key/key-pair.pem ubuntu@xx.xx.xx.xx:/home/ubuntu/key-pair.pem
+>

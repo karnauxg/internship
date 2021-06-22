@@ -1,0 +1,34 @@
+---
+- hosts: server13
+  become: true
+  tasks:
+    - name: install docker-compose
+      apt:
+        name: "{{item}}"
+        state: latest
+        update_cache: yes
+      loop:
+        - docker-compose
+
+    - name: сreate directory Compose
+      file:
+        path=/tmp/compose
+        mode=0755
+        owner=root
+        group=root
+        state=directory
+
+    - name: copy Docker Compose files
+      copy:
+        src: /home/ivoitukh/my/Exadel/internship/task4/compose/{{ item }}
+        dest: /tmp/compose/{{ item }}
+      loop:
+      - docker-compose.yml
+      - secret
+
+    # use files parameter to use multiple docker-compose.yml files
+    - name: deploy Docker Compose stack
+      docker_compose:
+        project_src: /tmp/compose
+        files:
+        - docker-compose.yml

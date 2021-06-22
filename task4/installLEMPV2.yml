@@ -1,0 +1,36 @@
+---
+- hosts: aws_ec2
+  become: true
+  vars:
+    ENV: "ENV=ivAnsible"
+  tasks:
+    - name: php-fpm container
+      docker_container:
+        image: php-fpm
+        name: php-fpm
+        state: started
+        links:
+        - "mysql:mysql"
+        volumes_from:
+        - mysql
+        env: "{{ ENV }}"
+    
+    - name: install nginx
+      docker_container:
+        image: nginx
+        name: nginx
+        state: started
+        volumes_from:
+          - "php-fpm"
+        links:
+          - "php-fpm:php-fpm"
+        ports:
+          - "80:80"
+          - "443:443"
+        env: "{{ ENV }}"
+
+    - name: mysql container
+      docker_container:
+        image: mysql
+        name: mysql
+        state: started

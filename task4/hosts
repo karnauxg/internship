@@ -1,0 +1,15 @@
+#[privat]
+#server ansible_host=10.0.10.5
+#server11 ansible_host=10.0.11.7
+#server12 ansible_host=10.0.12.14
+
+[public]
+main ansible_host=18.188.70.28
+s11 ansible_host=18.221.12.144
+s12 ansible_host=18.118.211.210
+
+[server13]
+s13 ansible_host=3.14.244.208
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3

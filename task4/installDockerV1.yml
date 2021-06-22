@@ -1,0 +1,11 @@
+---
+- hosts: public
+  # user: ubuntu
+  # sudo: yes
+
+  tasks:
+    - name: Transfer the bash script
+      copy: src=/home/ivoitukh/my/Exadel/internship/task4/installDocker.sh dest=/tmp/installDocker.sh mode=660
+
+    - name: Execute the script
+      command: sh /tmp/installDocker.sh

@@ -1,1 +1,5 @@
 ---
+gitclone: https://github.com/karnauxg/internship.git
+branch: main
+pathsrc: ./compose
+pathdest: /tmp/compose

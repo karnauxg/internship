@@ -13,5 +13,10 @@
 * Created Docker-compose
 
 ### Task 4: Ansible
-* 
+* File inventory
+* Create firste ansible-playbook
+* Install LAMP/LEMP stek
+* Use dymanic inventory
 
+### Task 5: Jenkins
+* 

@@ -16,3 +16,6 @@
 7. dynamic inventory: docs - https://aws.amazon.com/blogs/apn/getting-started-with-ansible-and-dynamic-amazon-ec2-inventory-management
 8. LAMP/LEMP in docker
 > <ansible-playbook ~/my/Exadel/internship/task4/installLEMPV1.yml -u ubuntu -i /home/my/Exadel/internship/task4/hosts --private-key=/home/instructure/key/key-pair.pem>
+9. Use dymanic inventory <ansible-playbook ~/my/Exadel/internship/task4/installLEMPV2.yml -u ubuntu -i /home/my/Exadel/internship/task4/internship_aws_ec2.yml --private-key=/home/instructure/key/key-pair.pem>
+> for dynamic inventory was used doc: https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html#parameter-iam_role_arn
+10. Run only selected tasks from playbook <ansible-playbook ~/my/Exadel/internship/task4/installLEMPV1.yml --tags "dependency" -u ubuntu -i /home/my/Exadel/internship/task4/hosts --private-key=/home/instructure/key/key-pair.pem>

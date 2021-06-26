@@ -1,0 +1,33 @@
+pipeline {
+	agent none
+	options { 
+		disableConcurrentBuilds() 
+		skipDefaultCheckout ()
+	}
+    stages {
+		stage("GitPull") {
+			agent { label "host"  }
+			steps {
+				script {
+                    checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: "main"]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CleanBeforeCheckout'], [$class: 'RelativeTargetDirectory', relativeTargetDir: 'git']], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/karnauxg/internship.git']]]
+                }
+                echo "Git Clone finished!!!"
+            }
+        }
+        stage('DockerBuild') {
+            agent { label "host"  }
+            steps {
+                sh 'docker build --build-arg DEVOPS=${params.PASSWORD} -t mywebapp:v1 /home/ubuntu/jenkins/workspace/BuildImgFromGit/git/task3'
+                sh "docker images"
+            }
+        }
+        stage('DockerRun') {
+            agent { label "host"  }
+            steps {
+                sh "docker run -e DEVOPS=${params.PASSWORD}  -d -p 9090:80 --name mywebapp mywebapp:v1 "
+                echo "************* Run Containers: *****************"
+                sh "docker ps -a"
+            }
+        }
+    }
+}

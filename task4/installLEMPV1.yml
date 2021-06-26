@@ -1,6 +1,8 @@
 ---
 - hosts: server13
   become: true
+  vars_files:
+    - ./vars.yml
   tasks:
     - name: install docker-compose
       apt:
@@ -9,10 +11,19 @@
         update_cache: yes
       loop:
         - docker-compose
+    
+    - name: Git Clone repo
+      git:
+        repo: {{ gitclone }}
+        dest: {{ pathsrc }}
+        version: {{ branch }}
+        accept_hostkey: yes
+        # key_file: /home/harry/.ssh/id_rsa
+      # become_user: harry
 
     - name: сreate directory Compose
       file:
-        path=/tmp/compose
+        path={{ pathdest }}
         mode=0755
         owner=root
         group=root
@@ -20,8 +31,8 @@
 
     - name: copy Docker Compose files
       copy:
-        src: /home/ivoitukh/my/Exadel/internship/task4/compose/{{ item }}
-        dest: /tmp/compose/{{ item }}
+        src: {{ pathsrc }}/task4/compose/{{ item }}
+        dest: {{ pathdest }}/{{ item }}
       loop:
       - docker-compose.yml
       - secret
@@ -29,6 +40,6 @@
     # use files parameter to use multiple docker-compose.yml files
     - name: deploy Docker Compose stack
       docker_compose:
-        project_src: /tmp/compose
+        project_src: {{ pathdest }}
         files:
         - docker-compose.yml

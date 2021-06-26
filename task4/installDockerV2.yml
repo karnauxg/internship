@@ -13,6 +13,8 @@
         - curl
         - gnupg-agent
         - software-properties-common
+      tags:
+        - dependency
   
     - name: add GPG key
       apt_key:

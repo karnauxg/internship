@@ -16,4 +16,5 @@
 - docker push localhost:5000/nginx:latest
 - ls /dockerrepo/docker/registry/v2/repositories
 - docker pull localhost:5000/nginx:latest
-5. Jenkinsfile for pull image from localRepo and run it. File situated in GitHub
+5. Jenkinsfile for pull image from localRepo and run it. File situated in GitHub <Jenkinsfile>
+6. Webhook GitHub and Jenkins

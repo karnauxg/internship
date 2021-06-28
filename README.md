@@ -19,4 +19,7 @@
 * Use dymanic inventory
 
 ### Task 5: Jenkins
-* 
+* Install Jenkins in docker
+* Install Jenkins via Ansible
+* Jenkinsfile
+* Webhook GitHub and Jenkins job

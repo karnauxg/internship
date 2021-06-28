@@ -24,7 +24,7 @@ pipeline {
         stage('DockerRun') {
             agent { label "host"  }
             steps {
-                sh "docker run -d -p 8181:80 --name nginxlocalrepo nginx:latest"
+                sh "docker run -d -p 8181:80 --name nginxlocalrepo localhost:5000/nginx:latest"
                 echo "************* Run Containers: *****************"
                 sh "docker ps -a"
             }

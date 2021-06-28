@@ -18,7 +18,7 @@
 * Install LAMP/LEMP stek
 * Use dymanic inventory
 
-### Task 5: Jenkins
+### Task 5: Jenkins CI/CD
 * Install Jenkins in docker
 * Install Jenkins via Ansible
 * Jenkinsfile

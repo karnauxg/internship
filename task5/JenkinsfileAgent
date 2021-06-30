@@ -1,0 +1,25 @@
+pipeline {
+	agent none
+	options { 
+		disableConcurrentBuilds() 
+		skipDefaultCheckout ()
+	}
+    stages {
+		stage("CloudDocker") {
+			agent { label "slave"  }
+            steps {
+                sh 'java -version'
+                echo "Get working directory"
+                sh 'pwd'
+            }
+        }
+        stage('SShAgentDocker') {
+            agent { label "sshagent"  }
+            steps {
+                sh 'java -version'
+                echo "Get working directory"
+                sh 'pwd'
+            }
+        }
+    }
+}

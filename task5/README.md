@@ -21,3 +21,7 @@
 - setup webhook <https://www.cprime.com/resources/blog/how-to-integrate-jenkins-github>
 7. Add slave as Docker Container
 - main options are <AgentAsDockerContainer.jpg>
+8. Add slave as SSH Docker Container
+- run container <docker run -d --rm --name=agent1 -p 22:22 -e "JENKINS_AGENT_SSH_PUBKEY=[your-public-key]" jenkins/ssh-agent:alpine>
+- you need indentify IP address's containers, I use command <docker exec -it <your ID runing containers> sh> AND  <hostname -i>
+9. For cheking how it works use script <JenkinsfileAgent>

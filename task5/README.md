@@ -19,3 +19,5 @@
 5. Jenkinsfile for pull image from localRepo and run it. File situated in GitHub <Jenkinsfile>
 6. Webhook GitHub and Jenkins
 - setup webhook <https://www.cprime.com/resources/blog/how-to-integrate-jenkins-github>
+7. Add slave as Docker Container
+- main options are <AgentAsDockerContainer.jpg>

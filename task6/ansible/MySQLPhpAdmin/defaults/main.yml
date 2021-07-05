@@ -1,0 +1,28 @@
+---
+mysql_backups_dir: /var/mysql/backups
+mysql_character_set: utf8
+mysql_collation: utf8_general_ci
+mysql_conf_dir: /etc/mysql/conf.d
+mysql_config_mysqld:
+  max_connections: 500
+  skip_name_resolve: "true"
+mysql_container_name: mysql
+mysql_env:
+  - name: mysql_env
+    MYSQL_DATABASE: internship
+    MYSQL_USER: ubuntu
+    MYSQL_PASSWORD: ubuntu
+mysql_database: internship
+mysql_network: default
+mysql_root_password: ubuntu
+mysql_lib_dir: /var/mysql/lib
+# mysql_network: mysql
+mysql_port: 3306
+mysql_state: started
+
+
+# phpmyadmin
+phpmyadmin:
+  dbname: internship
+  dbuser: ubuntu
+  dbpass: ubuntu

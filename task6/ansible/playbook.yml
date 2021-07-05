@@ -4,15 +4,15 @@
   become_method: sudo
   # become_user: ubuntu
 
-  # roles:
-  #   - docker
-  #   - mysql
-
   roles:
-    - docker
-    - role: mysql
-      vars:
-        dir: './secret'
-        # app_port: 5000
-      tags: typeA
+    # - docker
+    - MySQLPhpAdmin
+
+  # roles:
+  #   # - docker
+  #   - role: mysql
+  #     vars:
+  #       dir: './secret'
+  #       # app_port: 5000
+  #     # tags: typeA
 

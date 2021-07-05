@@ -1,0 +1,15 @@
+##
+
+[Master_node]
+3.15.141.12
+
+[slave_nodes]
+18.118.208.107
+18.224.60.251
+
+[mongodb:children]
+Master_node
+slave_nodes
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3

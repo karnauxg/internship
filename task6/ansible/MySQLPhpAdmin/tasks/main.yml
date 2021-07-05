@@ -1,0 +1,94 @@
+---
+- name: Ensure mysql dirs exist
+  become: true
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: yes
+  with_items:
+    - "{{ mysql_backups_dir }}"
+    - "{{ mysql_conf_dir }}"
+    - "{{ mysql_lib_dir }}"
+
+- name: Copy mysql config files
+  template:
+    src: "templates/{{ item }}.j2"
+    dest: "{{ mysql_conf_dir }}/{{ item }}"
+    force: yes
+  with_items:
+    - "character-set.cnf"
+    - "my.cnf"
+    - "sql-mode.cnf"
+
+- name: install pip
+  package:
+    name: python3-pip
+    state: present
+    update_cache: true
+  tags:
+    - pip
+
+- name: Create fleuntd services
+  docker_compose:
+    project_src: /root/
+  become: true
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+# - name: Create docker network
+#   docker_network:
+#     name: "{{ mysql_network }}"
+#     state: present
+
+- name: Run mysql 5.7 server
+  docker_container:
+    env:
+      MYSQL_ROOT_PASSWORD: "{{ mysql_root_password }}"
+    image: mysql:5.7
+    labels:
+      traefik.enable: "false"
+    name: "{{ mysql_container_name }}"
+    # networks:
+    #   - name: "{{ mysql_network }}"
+    ports:
+      - "{{ mysql_port }}:3306"
+    pull: true
+    recreate: true
+    restart_policy: always
+    state: "{{ mysql_state }}"
+    volumes:
+      - "{{ mysql_backups_dir }}:/var/backups/mysql"
+      - "{{ mysql_conf_dir }}:/etc/mysql/conf.d"
+      - "{{ mysql_lib_dir }}:/var/lib/mysql"
+
+- name: Install debconf-utils package first for automatic phpmyadmin questions management on install.
+  apt: pkg=debconf-utils
+  # sudo: yes
+
+- name: Render file with answers for debconf.
+  template:
+    src=debconf.j2
+    dest=/tmp/debconf.txt
+    owner=root
+    group=root
+    mode=0600
+  # sudo: yes
+
+- name: Pre-configure answers for debconf questions.
+  command: debconf-set-selections /tmp/debconf.txt
+  # sudo: yes
+
+# @todo: Replace with debconf Ansible module when upgrade minimum Ansible version to 1.6 or higher.
+# See http://docs.ansible.com/debconf_module.html
+- name: Delete file with debconf answers
+  file:
+    path=/tmp/debconf.txt
+    state=absent
+  # sudo: yes
+
+- name: Install phpMyAdmin - web tool for admin MySQL databases.
+  apt:
+    pkg=phpmyadmin
+    install_recommends=no
+    # We need install_recommends=no to not install apache2 by defaults.
+  # sudo: yes

@@ -23,3 +23,9 @@
 * Install Jenkins via Ansible
 * Jenkinsfile
 * Webhook GitHub and Jenkins job
+
+### Task 6: Databases
+* Run phpmyadmin+mysql
+* Create database - tables - import data - simple script
+* Dump and Restore
+* 

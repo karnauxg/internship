@@ -1,0 +1,45 @@
+---
+
+# - name: MySQL | Gather OS specific variables
+#   include_vars: "{{ mysql_flavour }}.yml"
+
+- name: install_mysql | Installing dependencies
+  apt:
+    pkg: "{{ mysql_required_libs }}"
+    state: present
+
+- name: install_mysql | Download MySQL config deb
+  get_url:
+    url: "{{ mysql_deb_repo }}"
+    dest: /usr/src
+    validate_certs: "no"
+
+- name: install_mysql | Install MySQL repo deb
+  apt:
+    deb: "/usr/src/{{ mysql_deb_package }}"
+
+- name: install_mysql | Fix Oracle s GPG key
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: A4A9406876FCBD3C456770C88C718D3B5072E1F5
+
+- name: install_mysql | Update cache
+  apt:
+    update_cache: true
+    allow_unauthenticated: true
+  changed_when: false
+
+- name: install_mysql | Check if MySQL is already installed
+  shell: dpkg -s "{{ mysql_flavour }}-server" | grep Status
+  register: installed_mysql
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+
+- name: install_mysql | Install MySQL packages
+  apt:
+    pkg: "{{ mysql_packages }}"
+    state: present
+    allow_unauthenticated: true
+  register: install_mysql
+  notify: upgrade schemas

@@ -1,0 +1,37 @@
+properties([
+    pipelineTriggers([githubPush()])
+])
+
+pipeline {
+	agent none
+	options { 
+		disableConcurrentBuilds() 
+		skipDefaultCheckout ()
+	}
+    stages {
+		stage("GitPull") {
+			agent { label "iv_db1"  }
+			steps {
+				script {
+                    checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: "main"]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CleanBeforeCheckout'], [$class: 'RelativeTargetDirectory', relativeTargetDir: 'git']], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/karnauxg/internship.git']]]
+                }
+                echo "Git Clone finished!!!"
+            }
+        }
+        stage('RunMySQL') {
+            agent { label "iv_db1"  }
+            steps {
+                 //The withCredentials block places a username and password securely into the environment
+                withCredentials([usernamePassword(credentialsId: 'vault_user', passwordVariable: 'VAULTPASS', usernameVariable: 'VAULTUSER')]) {
+                    sshagent(['ssh_user']) {
+                        //Here we invoke ansible remotely using ssh. We use the password retreived from withCredentials to feed to ansible and unlock the vault. 
+                        //To do this we first set the password as an environment variable and then used passmgr.py to echo this out
+                    sh "ansible-playbook /home/ubuntu/jenkins/workspace/mySQL/git/task6/playbook.yml -u $VAULTUSER -i /home/ubuntu/jenkins/workspace/mySQL/git/task6/ansible/hosts --private-key=/key-pair.pem"
+                    }
+                }
+            }
+        }
+
+    }
+}
+

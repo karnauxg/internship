@@ -1,0 +1,8 @@
+# [database]
+# srvDB ansible_host=18.116.88.133
+
+[db]
+srv ansible_host=3.15.141.12
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3

@@ -1,5 +1,5 @@
 ---
-- hosts: server13
+- hosts: database
   become: true
   vars_files:
     - ./vars.yml
@@ -12,14 +12,14 @@
       loop:
         - docker-compose
     
-    - name: Git Clone repo
-      git:
-        repo: {{ gitclone }}
-        dest: {{ pathsrc }}
-        version: {{ branch }}
-        accept_hostkey: yes
-        # key_file: /home/harry/.ssh/id_rsa
-      # become_user: harry
+    # - name: Git Clone repo
+    #   git:
+    #     repo: {{ gitclone }}
+    #     dest: {{ pathsrc }}
+    #     version: {{ branch }}
+    #     accept_hostkey: yes
+    #     # key_file: /home/harry/.ssh/id_rsa
+    #   # become_user: harry
 
     - name: сreate directory Compose
       file:
@@ -33,13 +33,8 @@
       copy:
         src={{ pathsrc }}
         dest={{ pathdest }}
-      # loop:
-      # - docker-compose.yml
-      # - secret
-
-    # use files parameter to use multiple docker-compose.yml files
+    
     - name: deploy Docker Compose stack
       docker_compose:
-        project_src: {{ pathdest }}
-        files:
-        - docker-compose.yml
+        project_src={{ pathdest }}/compose
+        files=docker-compose.yml

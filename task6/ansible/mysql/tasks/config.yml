@@ -1,0 +1,95 @@
+---
+
+# - name: config | Copy MySQL service config
+#   template:
+#     src: "{{ mysql_flavour }}.service.j2"
+#     dest: "/lib/systemd/system/{{ mysql_flavour }}.service"
+#     owner: root
+#     group: root
+#     mode: 0644
+#   notify: restart mysql
+
+# - name: config | Copy global MySQL configuration
+#   template:
+#     src: my.cnf.j2
+#     dest: "{{ mysql_config_file }}"
+#     owner: root
+#     group: root
+#     mode: 0644
+#   notify: restart mysql
+#   when: mysql_flavour == 'mysql'
+
+- name: config | Ensure additional options file include dir exists
+  file:
+    path: "{{ mysql_extra_conf_include_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: config | Ensure additional options file and template paths exists
+  file:
+    path: "{{ mysql_extra_conf_include_dir }}/{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  with_filetree:
+    - "{{ mysql_extra_conf_playbook_path }}/"
+    - "{{ mysql_extra_conf_template_playbook_path }}/"
+  when: item.state == "directory"
+
+# - name: config | Copy extra option files (provided by playbooks)
+#   copy:
+#     src: "{{ item.src }}"
+#     dest: "{{ mysql_extra_conf_include_dir }}/{{ item.path }}"
+#     owner: root
+#     group: root
+#     mode: 0644
+#   with_filetree:
+#     - "{{ mysql_extra_conf_playbook_path }}/"
+#   when: item.state == "file"
+#   notify: restart mysql
+
+# - name: config | Copy extra option files templates (provided by playbooks)
+#   template:
+#     src: "{{ item.src }}"
+#     dest: "{{ mysql_extra_conf_include_dir }}/{{ item.path | splitext | first }}"  # This is to remove .j2 extension
+#     owner: root
+#     group: root
+#     mode: 0644
+#   with_filetree:
+#     - "{{ mysql_extra_conf_template_playbook_path }}/"
+#   when: item.state == "file"
+#   notify: restart mysql
+
+- name: config | Ensure datadir exists
+  file:
+    path: "{{ mysql_datadir }}"
+    state: directory
+    owner: "{{ mysql_user }}"
+    group: "{{ mysql_group }}"
+    mode: 0750
+
+- name: config | Check if datadir is initialized
+  command: ls "{{ mysql_datadir }}/mysql"
+  register: ls_datadir
+  ignore_errors: true
+  changed_when: false
+
+- name: config | Trying to initialize datadir
+  command: /usr/sbin/mysqld --initialize-insecure --user={{ mysql_user }}
+  register: result
+  ignore_errors: true
+  changed_when: result.rc == 0
+  when: ls_datadir.stdout | length == 0
+
+- name: config | Ensure MySQL is started and enabled on boot
+  service:
+    name: mysql
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: config | Flush handlers to restart MySQL after previous initialization
+  meta: flush_handlers

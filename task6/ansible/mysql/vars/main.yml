@@ -1,0 +1,11 @@
+---
+# vars file for mysql
+mysql_deb_package: "mysql-apt-config_{{ mysql_version }}_all.deb"
+mysql_deb_repo: "http://dev.mysql.com/get/{{ mysql_deb_package }}"
+
+mysql_required_libs:
+  - python3-mysqldb
+
+mysql_packages:
+  - mysql-common
+  - mysql-server

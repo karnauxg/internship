@@ -1,0 +1,12 @@
+docker run --name myphpadmin -t \
+      -e PMA_HOST="mysql-server" \
+      -e MYSQL_USER="zabbix" \
+      -e MYSQL_PASSWORD="zabbix_pwd" \
+      -e MYSQL_ROOT_PASSWORD="root_pwd" \
+      --restart unless-stopped \
+      --link mysql-server:db \
+      -p 8081:80 \
+      -d phpmyadmin/phpmyadmin
+
+http://IP:8081
+root:root_pwd

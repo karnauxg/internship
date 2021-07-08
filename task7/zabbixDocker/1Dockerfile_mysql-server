@@ -1,0 +1,13 @@
+docker run --name mysql-server -t \
+      -e MYSQL_DATABASE="zabbix" \
+      -e MYSQL_USER="zabbix" \
+      -e MYSQL_PASSWORD="zabbix_pwd" \
+      -e MYSQL_ROOT_PASSWORD="root_pwd" \
+      --restart unless-stopped \
+      -d mysql:8.0 \
+      --character-set-server=utf8 --collation-server=utf8_bin \
+      --default-authentication-plugin=mysql_native_password
+
+
+# command for expose port for running docker container
+docker run --rm -p 3306:3306 verb/socat TCP-LISTEN:3306,fork TCP-CONNECT:172.17.0.2:3306

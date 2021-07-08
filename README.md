@@ -28,4 +28,9 @@
 * Run phpmyadmin+mysql
 * Create database - tables - import data - simple script
 * Dump and Restore
-* 
+* Run mongoDB cluster
+
+### Task 7: Logging&Monitoring. Big Brother
+* Zabbix
+* ELK
+* Grafana

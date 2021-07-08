@@ -1,0 +1,6 @@
+docker run --name zabbix-agent-host -t \
+    -e ZBX_HOSTNAME="zabbix-agent-host" \
+    -e ZBX_SERVER_HOST="10.0.10.5" \
+    --link zabbix-server-mysql \
+    -p 10050:10050 \
+    -d zabbix/zabbix-agent:alpine-5.4-latest

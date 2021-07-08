@@ -25,9 +25,10 @@
 - Click the Go button to export the backup, execute the SQL commands, and re-create your database.
 6. Ansible role for install mySQL <playbook.yaml AND ./mysql>
 - init ansible roles <ansible-galaxy init mysql>
-
 7. Репликация - это механизм синхронизации содержимого нескольких копий объекта (например, содержимого базы данных). Репликация — это процесс, под которым понимается копирование данных из одного источника на другой (или на множество других) и наоборот. При репликации изменения, сделанные в одной копии объекта, могут быть распространены в другие копии.
 Репликация делается автоматически, вам не надо делать вручную эскпорт, потом импорт.
 <https://dev.mysql.com/doc/refman/5.6/en/replication.html>
-
+8. Create cluster for mongoDB
+- <ansible-playbook ./playbook.yml -u ubuntu -i ./hosts --private-key=/home/instructure/key/key-pair.pem>
+- check mongoDB version <ansible all -a "mongod --version" -u ubuntu -i ./hosts --private-key=/home/instructure/key/key-pair.pem>
 

@@ -1,0 +1,5 @@
+docker run --name activecheck-zabbix \
+    --link zabbix-server-mysql:zabbix-server-mysql \
+    -p 10050:10050 \
+    -d zabbix/zabbix-agent:alpine-5.4-latest
+

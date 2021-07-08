@@ -1,0 +1,15 @@
+docker run --name zabbix-web-nginx-mysql -t \
+      -e ZBX_SERVER_HOST="zabbix-server-mysql" \
+      -e DB_SERVER_HOST="mysql-server" \
+      -e MYSQL_DATABASE="zabbix" \
+      -e MYSQL_USER="zabbix" \
+      -e MYSQL_PASSWORD="zabbix_pwd" \
+      -e MYSQL_ROOT_PASSWORD="root_pwd" \
+      -p 80:8080 \
+      --restart unless-stopped \
+      --link zabbix-server-mysql \
+      --link mysql-server:db \
+      -d zabbix/zabbix-web-nginx-mysql:alpine-5.4-latest
+
+http://IP:80
+Admin:zabbix

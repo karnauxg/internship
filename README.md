@@ -21,6 +21,7 @@
 ### Task 5: Jenkins CI/CD
 * Install Jenkins in docker
 * Install Jenkins via Ansible
+* Local docker registry
 * Jenkinsfile
 * Webhook GitHub and Jenkins job
 
@@ -29,6 +30,7 @@
 * Create database - tables - import data - simple script
 * Dump and Restore
 * Run mongoDB cluster
+* install MySQL from APT - https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/
 
 ### Task 7: Logging&Monitoring. Big Brother
 * Zabbix

@@ -1,4 +1,4 @@
-## Task 6: Logging&Monitoring. Big Brother.
+## Task 7: Logging&Monitoring. Big Brother.
 ### Zabbix-server in Docker (Min memory: 2Gb. Min CPU: 2. Min HDD: 15Gb. OS: CentOS 7x64)
 - docs <https://www.zabbix.com/documentation/current/manual/installation/containers>
 - install Docker and Docker-compose <task7/zabbixDocker/installDocker.sh>

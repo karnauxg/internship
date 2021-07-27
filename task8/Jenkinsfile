@@ -21,14 +21,12 @@ pipeline {
         stage('DockerBuild') {
             agent { label "jenkins_host"  }
             steps {
-                sh 'docker pull localhost:5000/nginx:latest'
                 sh "docker images"
             }
         }
         stage('DockerRun') {
             agent { label "jenkins_host"  }
             steps {
-                sh "docker run -d -p 8181:80 --name nginxlocalrepo localhost:5000/nginx:latest"
                 echo "************* Run Containers: *****************"
                 sh "docker ps -a"
             }

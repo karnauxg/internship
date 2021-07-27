@@ -21,6 +21,7 @@ pipeline {
         stage('DockerBuild') {
             agent { label "jenkins_host"  }
             steps {
+		echo "************* images: *****************"
                 sh "docker images"
             }
         }

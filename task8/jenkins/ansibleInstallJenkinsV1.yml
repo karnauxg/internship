@@ -1,0 +1,87 @@
+---
+- name: Install Jenkins
+  hosts: jenkins
+  #user: ubuntu
+  # sudo: yes
+  # gather_facts: false
+  become: true
+
+  tasks:
+    - name: install dependency
+      apt:
+        name: "{{item}}"
+        state: present
+        update_cache: yes
+      loop:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg-agent
+        - software-properties-common
+  
+    - name: add GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: add docker repository to apt
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - name: install docker
+      apt:
+        name: "{{item}}"
+        state: latest
+        update_cache: yes
+      loop:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+  
+    - name: chech if docker is started
+      service:
+        name: docker
+        state: started
+        enabled: yes
+    
+    - name: Ensure jenkins directory on docker host
+      file:
+        state: directory
+        owner: 1000
+        group: 1000
+        path: /var/jenkins_home
+      
+    - name: install pip
+      package:
+        name: python3-pip
+        state: present
+        update_cache: true
+      tags:
+        - pip
+
+    - name: Create a container from the jenkins docker image
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
+      docker_container:
+        name: jenkins-server
+        image: jenkins/jenkins:lts
+        state: started
+        ports:
+            - "8080:8080"
+            - "50000:50000"
+        volumes:
+            - "/var/jenkins_home:/var/jenkins_home"
+        recreate: no
+      tags:
+         - rundocker
+
+    - name: init password jenkin
+      shell: docker exec jenkins-server cat /var/jenkins_home/secrets/initialAdminPassword
+      changed_when: false
+      register: result
+
+    - name: print init password jenkins
+      debug:
+        var: result.stdout
+    

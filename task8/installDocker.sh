@@ -20,4 +20,4 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose
 sudo groupadd docker
 sudo usermod -aG docker $USER
 sudo systemctl enable docker
-sudo chmod 660 /var/run/docker.sock
+sudo chmod 777 /var/run/docker.sock

@@ -1,0 +1,28 @@
+---
+- name: Install Java
+  hosts: jenkins
+  #user: ubuntu
+  # sudo: yes
+  # gather_facts: false
+  become: true
+
+  tasks:
+    - name: Install Java using Ansible
+      become: yes
+      apt:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+           - openjdk-11-jdk
+
+    - name: check if java instaled
+      shell: which java
+      changed_when: false
+      register: result
+
+    - name: print java-path
+      debug:
+        var: result.stdout
+  
+    

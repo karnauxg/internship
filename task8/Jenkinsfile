@@ -1,0 +1,37 @@
+properties([
+    pipelineTriggers([githubPush()])
+])
+
+pipeline {
+	agent none
+	options { 
+		disableConcurrentBuilds() 
+		skipDefaultCheckout ()
+	}
+    stages {
+		stage("GitPull") {
+			agent { label "jenkins_host"  }
+			steps {
+				script {
+                    checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: "main"]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CleanBeforeCheckout'], [$class: 'RelativeTargetDirectory', relativeTargetDir: 'git']], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/karnauxg/internship.git']]]
+                }
+                echo "Git Clone finished!!!"
+            }
+        }
+        stage('DockerBuild') {
+            agent { label "jenkins_host"  }
+            steps {
+                sh 'docker pull localhost:5000/nginx:latest'
+                sh "docker images"
+            }
+        }
+        stage('DockerRun') {
+            agent { label "jenkins_host"  }
+            steps {
+                sh "docker run -d -p 8181:80 --name nginxlocalrepo localhost:5000/nginx:latest"
+                echo "************* Run Containers: *****************"
+                sh "docker ps -a"
+            }
+        }
+    }
+}

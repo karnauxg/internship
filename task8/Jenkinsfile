@@ -10,7 +10,7 @@ pipeline {
 	}
     stages {
 		stage("GitPull") {
-			agent { label "jenkins_host"  }
+			agent { label "host"  }
 			steps {
 				script {
                     checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: "main"]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CleanBeforeCheckout'], [$class: 'RelativeTargetDirectory', relativeTargetDir: 'git']], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/karnauxg/internship.git']]]
@@ -19,14 +19,14 @@ pipeline {
             }
         }
         stage('DockerBuild') {
-            agent { label "jenkins_host"  }
+            agent { label "host"  }
             steps {
 		echo "************* images: *****************"
                 sh "docker images"
             }
         }
         stage('DockerRun') {
-            agent { label "jenkins_host"  }
+            agent { label "host"  }
             steps {
                 echo "************* Run Containers: *****************"
                 sh "docker ps -a"

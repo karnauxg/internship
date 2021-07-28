@@ -7,6 +7,6 @@
 
 # docker run -d -p 3000:3000 --name redminesrv --link redmine-mysql redmineweb:v1
 
-docker run -d -p 3000:3000 --name redminesrv -e GITlink=https://github.com/redmine/redmine.git -e redmineDB=redmineDB -e redmineUSER=redmine -e redminePASS=secret -e dbhost=redmine-mysql -e r_env=production --link redmine-mysql 
+docker run -d -p 3000:3000 --name redminesrv -e GITlink=https://github.com/redmine/redmine.git -e redmineDB=redmineDB -e redmineUSER=redmine -e redminePASS=secret -e dbhost=redmine-mysql -e r_env=production --link redmine-mysql
 
 

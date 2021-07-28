@@ -7,9 +7,9 @@
 - docker run -d -p 3000:3000 --name redminesrv -e r_env=production redmineweb:v1
 
 build-arg:
-GITlink -
-redmineDB -
-redmineUSER -
-redminePASS -
-dbhost -
-r_env -
+GITlink - <your git link>
+redmineDB - <name databases>
+redmineUSER - <redmine user>
+redminePASS - <redmine pass>
+dbhost - <url DB server>
+r_env - <production>

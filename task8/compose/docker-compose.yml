@@ -1,24 +1,24 @@
 version: '3.3'
 
 services:
-
-  phpadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: myadmin
-    links:
-      - database:internship
-    ports:
-      - "1111:80"
-    env_file:
-      - "secret"
-    volumes:
-      - ./db:/var/lib/mysql
+  redminebuild:
+    build: /home/ivoitukh/my/Exadel/internship/task8/build
+    image: redmineweb:v1
+      # build: ${WORKSPACE}/GitPull/task8/build
+    environment:
+      GITlink: https://github.com/edavis10/redmine
+      redmineDB: redmineDB
+      redmineUSER: redmine
+      redminePASS: secret
+      dbhost: 172.17.0.2
+      r_en: production
+    container_name: redminebuild
     depends_on:
       - database
 
   database:
     image: mysql:5.7
-    container_name: db
+    container_name: redmine-mysql
     # restart: always
     env_file:
       - "secret"
@@ -28,5 +28,25 @@ services:
       - '3306'
     volumes:
       - ./db:/var/lib/mysql
-    
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:3306"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 5
+
+  start_redmine:
+    image: redmineweb:v1
+    container_name: redminesrv
+    # restart: always
+    env_file:
+      - "secret"
+    ports:
+      - '3000:3000'
+    expose:
+      - '3000'
+    depends_on:
+      - database
+      - redminebuild
+
+
   

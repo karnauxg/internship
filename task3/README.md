@@ -12,7 +12,7 @@
 >>> OR docker run -d --rm -p 8080:80 --name mywebapp mywebapp:v1 
 4. Push my image to DockerHub
 > docker login
->> docker tag mywebapp:v1 mywebapp:v1
->>> docker push <yourDockerID>/mywebapp:v1
+>> docker tag <existing-image> <hub-user>/<repo-name>[:<tag>]
+>>> docker push <hub-user>/<repo-name>:<tag>
 5. Create docker-compose file with a separate configure file <docker-compose.yml>. Configure file - <envConfig>
 > <docker-compose up --scale webpages=5 -d>  OR <docker-compose up -d>

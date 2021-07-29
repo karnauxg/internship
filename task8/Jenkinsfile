@@ -1,36 +1,85 @@
 properties([
-    pipelineTriggers([githubPush()])
+    pipelineTriggers([githubPush()]),
+    disableConcurrentBuilds(),
+    buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')), 
 ])
 
 pipeline {
-	agent none
+	agent { label "host"  }
 	options { 
 		disableConcurrentBuilds() 
 		skipDefaultCheckout ()
 	}
     stages {
-		stage("GitPull") {
-			agent { label "host"  }
+		stage("BuildRedmine") {
+			// agent { label "host"  }
 			steps {
+                cleanWs disableDeferredWipeout: true, deleteDirs: true
+                echo "*** Git Clone start ***"
 				script {
-                    checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: "main"]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CleanBeforeCheckout'], [$class: 'RelativeTargetDirectory', relativeTargetDir: 'git']], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/karnauxg/internship.git']]]
+                    checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: "main"]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CleanBeforeCheckout'], [$class: 'RelativeTargetDirectory', relativeTargetDir: "GitPull"]], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/karnauxg/internship.git']]]
+                
+                    echo "*** Git Clone finished ***"
+
+                    echo "*** Run MySQL:5.7 *** - ${WORKSPACE}"
+                    sh "docker run -d --name redmine-mysql -e MYSQL_USER=${b_user} -e MYSQL_PASSWORD=${b_pass} -e MYSQL_DATABASE=${b_db} -e MYSQL_RANDOM_ROOT_PASSWORD=1 mysql:5.7"
+                    
+                    echo "*** Run Redmine build *** ${WORKSPACE}"
+                    sh "cd /var/jenkins_home/workspace/${JOB_NAME}/GitPull/task8/build && docker build -t redmineweb:v1 --build-arg GITlink=${GITlink} --build-arg redmineDB=${b_db} --build-arg redmineUSER=${b_user} --build-arg redminePASS=${b_pass} --build-arg dbhost=172.17.0.3 --build-arg r_env=production ."
+
+                    echo "*** Run Redmine for check ***"
+                    sh "docker run -d -p 3000:3000 --name redminesrv redmineweb:v1"
+                    sleep 30 
                 }
-                echo "Git Clone finished!!!"
             }
         }
-        stage('DockerBuild') {
-            agent { label "host"  }
+
+        stage('TestRedmine') {
+            // agent { label "host"  }
             steps {
-		echo "************* images: *****************"
-                sh "docker images"
-            }
-        }
-        stage('DockerRun') {
-            agent { label "host"  }
-            steps {
-                echo "************* Run Containers: *****************"
                 sh "docker ps -a"
+                echo "*** Get html-code 200 from Redmine ***"
+                sh '''IPAddress=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' redminesrv) && codehtml=$(curl -o /dev/null -s -w "%{http_code}" http://$IPAddress:3000)
+                    if [ "$codehtml" -eq "200" ]; 
+                        then touch /var/jenkins_home/workspace/${JOB_NAME}/200.csv
+                    fi'''
+             }
+        }
+
+
+        stage('PushImageToHub') {
+            // agent { label "host"  }
+            steps {
+                echo "************* Push Image To Docker Hub *****************"
+                withCredentials([usernamePassword(
+				    credentialsId: '011480d3-8604-4245-8e56-6333c9f3afad',
+					usernameVariable: 'user',
+					passwordVariable: 'pw', )]) {
+                        sh """if [ -e /var/jenkins_home/workspace/${JOB_NAME}/200.csv ]
+                                then docker login --username=$user --password=$pw
+                                    docker tag redmineweb:v1 $user/redmine:${BUILD_NUMBER}
+                                    docker push $user/redmine:${BUILD_NUMBER}
+                            fi"""
+                }
+
             }
         }
+
+        stage('Service') {
+            // agent { label "host"  }
+            steps {
+                echo "************* Before Clean host *****************"
+                sh "docker ps -a"
+                sh "docker images -a"
+                sh "docker rm -f redminesrv redmine-mysql"
+                sh "docker system prune -a -f"
+                sh "rm -rf /var/jenkins_home/workspace/${JOB_NAME}/*"
+                echo "************* After Clean host *****************"
+                sh "docker ps -a"
+                sh "docker imsges -a"
+            }
+        }
+
     }
 }
+

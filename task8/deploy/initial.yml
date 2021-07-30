@@ -1,0 +1,10 @@
+- hosts: master
+  become: yes
+  tasks:
+
+    - name: Git checkout
+      ansible.builtin.git:
+        repo: 'https://github.com/karnauxg/internship.git'
+        dest: /home/ubuntu/redmine
+        # single_branch: clone
+        version: main

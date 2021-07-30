@@ -76,7 +76,7 @@ pipeline {
                 sh "rm -rf /var/jenkins_home/workspace/${JOB_NAME}/*"
                 echo "************* After Clean host *****************"
                 sh "docker ps -a"
-                sh "docker imsges -a"
+                sh "docker images -a"
             }
         }
 

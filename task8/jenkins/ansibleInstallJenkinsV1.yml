@@ -18,6 +18,7 @@
         - curl
         - gnupg-agent
         - software-properties-common
+        - ansible
   
     - name: add GPG key
       apt_key:

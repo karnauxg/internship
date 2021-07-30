@@ -1,0 +1,82 @@
+- hosts: master
+  become: yes
+  tasks:
+    - name: initialize the cluster
+      shell: kubeadm init --pod-network-cidr=10.244.0.0/16 >> cluster_initialized.txt
+      args:
+        chdir: $HOME
+        creates: cluster_initialized.txt
+
+    - name: create .kube directory
+      become: yes
+      become_user: ubuntu
+      file:
+        path: $HOME/.kube
+        state: directory
+        mode: 0755
+
+    - name: copy admin.conf to user's kube config
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /home/ubuntu/.kube/config
+        remote_src: yes
+        owner: ubuntu
+
+    - name: install Pod network
+      become: yes
+      # become_user: ubuntu
+      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml >> pod_network_setup.txt
+      args:
+        chdir: $HOME
+        creates: pod_network_setup.txt
+
+    # - name: install Pod network
+    #   become: yes
+    #   become_user: ubuntu
+    #   shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/k8s-manifests/kube-flannel-rbac.yml >> pod_network_setup.txt
+    #   args:
+    #     chdir: $HOME
+    #     creates: pod_network_setup.txt
+
+    - name: Restart Service Kubelet
+      become: yes
+      # become_user: ubuntu
+      shell: systemctl restart kubelet
+      tags:
+        service    
+
+    - name: Get Helm tar file with owner and permissions
+      become: yes
+      become_user: ubuntu
+      get_url:
+        url: "https://get.helm.sh/helm-v3.0.0-linux-amd64.tar.gz"
+        dest: /home/ubuntu
+        owner: foo
+        group: foo
+        mode: '0644'
+      tags:
+        helm
+    
+    - name: Extract TAR Helm
+      become: yes
+      become_user: ubuntu
+      unarchive:
+        src: /home/ubuntu/helm-v3.0.0-linux-amd64.tar.gz
+        dest: /home/ubuntu/
+        remote_src: yes
+      tags:
+        helm
+
+    - name: install Helm
+      become: yes
+      # become_user: ubuntu
+      shell: |
+        mv linux-amd64/helm /usr/local/bin/helm
+        helm version
+      tags:
+        helm
+
+      # sudo systemctl restart kubelet
+      # sudo systemctl status kubelet
+
+

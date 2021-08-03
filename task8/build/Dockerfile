@@ -9,10 +9,10 @@ ARG redmineUSER=redmine
 ARG redminePASS=redmine
 ARG dbhost=localhost
 
-ENV redmineDB=redmine
-ENV redmineUSER=redmine
-ENV redminePASS=redmine
-ENV dbhost=localhost
+ENV redmineDB ${redmineDB}
+ENV redmineUSER ${redmineUSER}
+ENV redminePASS ${redminePASS}
+ENV dbhost ${dbhost}
 
 COPY ./installRVM_docker.sh installRVM.sh
 RUN sh installRVM.sh
@@ -25,5 +25,6 @@ RUN chmod +x entrypoint.sh buid_Redmine.sh
 RUN sh buid_Redmine.sh $GITlink $redmineDB $redmineUSER $redminePASS $dbhost $r_env
 
 EXPOSE 3000
-ENTRYPOINT ["sh", "/var/entrypoint.sh", "production"]
-CMD ["production" "-d"]
+# ENTRYPOINT ["sh", "/var/entrypoint.sh", "production", "$redmineDB", "$redmineUSER", "$redminePASS", "$dbhost" ]
+# CMD ["production" "$redmineDB" "$redmineUSER" "$redminePASS" "$dbhost" "-d"]
+CMD ["sh", "-c", "/var/entrypoint.sh production $redmineDB $redmineUSER $redminePASS $dbhost" ] 

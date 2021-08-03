@@ -21,13 +21,13 @@ testFramework:
 ## Specify password for root user
 ##
 # Default: random 10 character string
-mysqlRootPassword: testing
+mysqlRootPassword: redmine_root
 
 # Create a database user
 #
-mysqlUser:
+mysqlUser: redmine
 # Default: random 10 character string
-mysqlPassword:
+mysqlPassword: secret
 
 ## Allow unauthenticated access, uncomment to enable
 ##
@@ -35,7 +35,7 @@ mysqlPassword:
 
 # Create a database
 #
-mysqlDatabase:
+mysqlDatabase: redmineDB
 
 ## Specify an imagePullPolicy (Required)
 ## It's recommended to change this to 'Always' if the image tag is 'latest'
@@ -70,8 +70,8 @@ extraInitContainers: |
 # Optionally specify an array of imagePullSecrets.
 # Secrets must be manually created in the namespace.
 # ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
-# imagePullSecrets:
-  # - name: myRegistryKeySecretName
+imagePullSecrets:
+  - name: myredmine-secret
 
 ## Node selector
 ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
@@ -102,7 +102,7 @@ readinessProbe:
 
 ## Persist data to a persistent volume
 persistence:
-  enabled: true
+  enabled: false
   ## database data Persistent Volume Storage Class
   ## If defined, storageClassName: <storageClass>
   ## If set to "-", storageClassName: "", which disables dynamic provisioning

@@ -20,10 +20,4 @@ To get assecc from outside (NodePort) - https://github.com/kubernetes/dashboard/
 - kubectl -n kube-system describe secrets namespace-controller-token-r6nnh
 
 
-### Deploy Redmin
-1. kubectl create namespace redmine
-2. kubectl create deployment redmine-mysql --image=mysql:5.7
 
-kubectl api-resources --namespaced=true / false
-kubectl get pods --all-namespaces
-kubectl -n kubernetes-dashboard edit service kubernetes-dashboard   (edit online resource)

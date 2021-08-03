@@ -1,0 +1,385 @@
+	properties([
+		buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '18')), 
+		parameters([
+			[$class: 'ChoiceParameter', choiceType: 'PT_SINGLE_SELECT', description: 'Text for notifacation: \\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\Jenkins\\groovy\\TextForMail(Ext/QA).groovy', filterLength: 1, filterable: false, 
+				name: 'Project', randomName: 'choice-parameter-721214989061500', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: 'return[\'RMO:selected\',\'Artemis\']']]], 
+			
+			[$class: 'ChoiceParameter', choiceType: 'PT_SINGLE_SELECT', description: '', filterLength: 1, filterable: false, 
+				name: 'ExternalInternal', randomName: 'choice-parameter-725104459575400', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: 'return[\'NoMailList:selected\',\'ExternalMail\',\'InternalForQA\']']]],
+				
+			[$class: 'ChoiceParameter', choiceType: 'PT_SINGLE_SELECT', description: '', filterLength: 1, filterable: false, 
+				name: 'Deploy', randomName: 'choice-parameter-2935451769170100', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: 'return[\'-:selected\',\'ExternalStart\',\'ExternalFinish\']']]],
+			
+			[$class: 'ChoiceParameter', choiceType: 'PT_SINGLE_SELECT', description: '', filterLength: 1, filterable: false, 
+				name: 'Zone', randomName: 'choice-parameter-614517303738500', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: 'evaluate(new File(\'\\\\\\\\rmo-apps\\\\fs\\\\SaaS\\\\Releases\\\\RMO_Deployment\\\\NEWDAY\\\\Jenkins\\\\groovy\\\\ZONE.groovy\'))']]], 
+			
+			[$class: 'CascadeChoiceParameter', choiceType: 'PT_SINGLE_SELECT', description: '', filterLength: 1, filterable: false, 
+				name: 'Environment', randomName: 'choice-parameter-614517325864500', referencedParameters: 'Zone', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: 'evaluate(new File(\'\\\\\\\\rmo-apps\\\\fs\\\\SaaS\\\\Releases\\\\RMO_Deployment\\\\NEWDAY\\\\Jenkins\\\\groovy\\\\ENVIRONMENT.groovy\'))']]], 
+
+			[$class: 'FileSystemListParameterDefinition', description: 'Select the Build from FTP', 
+				name: 'BuildFromFTP', path: '\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO', regexExcludePattern: 'Build 6.*', regexIncludePattern: '', selectedType: 'DIRECTORY', sortByLastModified: false, sortReverseOrder: true],			
+				
+			[$class: 'ChoiceParameter', choiceType: 'PT_SINGLE_SELECT', description: '', filterLength: 1, filterable: false, 
+				name: 'AzureInsight', randomName: 'choice-parameter-721215033754500', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: 'return[\'No:selected\',\'install\']']]], 
+
+			[$class: 'ChoiceParameter', choiceType: 'PT_SINGLE_SELECT', description: '', filterLength: 1, filterable: false, 
+				name: 'RMOPortal', randomName: 'choice-parameter-721215075787400', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, script: 'return[\'-:selected\',\'Open\',\'Close\']']]]
+		])
+	])
+
+node ( "RMO_master") {
+	try {
+		script {
+			web01 = "NO_WEB01"
+			web02 = "NO_WEB02"
+			web03 = "NO_WEB03"
+			artemis = "NO_Artemis"
+			AzureInsight = "AzureInsight_No"
+			NoMail = "SendMail_OK"
+			rmomaster = "RMO_master"
+			RMOClose = "RMOCloseNo"
+			ArtemisClose = "ArtemisCloseNo"
+
+			if (params.Environment == 'vNext') { 
+				web01 = "${env.Zone}_WEB19"
+				web02 = "${env.Zone}_WEB20"
+				web03 = "${env.Zone}_WEB21"	
+			} else {
+				web01 = "${env.Zone}_WEB01"
+				web02 = "${env.Zone}_WEB02"
+				web03 = "${env.Zone}_WEB03"	
+			}
+			if (params.AzureInsight == 'install') { 
+				AzureInsight = "AzureInsight_OK"
+			}
+	
+			if ( params.Project == 'RMO')  {
+				if (params.RMOPortal.contains('e')) {
+					RMOClose = "RMO_OK"
+				}
+			} else { 
+				if (params.RMOPortal.contains('e')) {
+					ArtemisClose = "Artemis_OK"
+					artemis = "${env.Zone}_${env.Environment}_WEB_ARTEMIS"
+				}
+			} 
+
+			if (params.ExternalInternal == 'NoMailList') { 
+				NoMail = "NoMailList"
+			}
+			
+			echo "My param is - ${AzureInsight}, ${RMOClose}, ${ArtemisClose}, ${NoMail}"
+		}
+	} catch (e) {
+		stage 'ERROR' 
+			script {
+				wrap([$class: 'BuildUser']) { currentBuild.displayName = "${BUILD_USER}.Error" }
+			}
+			currentBuild.result = 'FAILURE' 
+			autoCancelled = true
+			error('Aborting the build.')
+	}
+}
+
+pipeline {
+	agent none
+	options { 
+		disableConcurrentBuilds() 
+		skipDefaultCheckout ()
+	}
+    stages {
+        stage("Main") {
+			agent { label "${rmomaster}"  }
+			steps {
+				script {
+//					checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: 'master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CleanBeforeCheckout'], [$class: 'RelativeTargetDirectory', relativeTargetDir: 'RMO']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'e4ddd432-b8de-406d-9989-5d0ed5dfcba3', url: 'ssh://git@adlm.nielsen.com:7999/rmo/rmo.git']]]
+					
+					clean = powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Builds\\CleanWS.ps1" 
+					if (clean == 0) { echo "Clean has done" }
+
+					zip archive: true, dir: 'RMO/Jenkins/', glob: '', zipFile: 'Jenkins.zip'
+					archiveArtifacts artifacts: 'Jenkins.zip'
+
+					script { wrap([$class: 'BuildUser']) { currentBuild.displayName = "${BUILD_USER}.${env.Environment}.${env.BuildFromFTP}.${env.BUILD_NUMBER}" } }
+
+				}
+			}
+		}
+		
+		stage ('SendMail') {
+			when {  expression { NoMail == 'SendMail_OK' }  }
+			agent { label "${rmomaster}"  }
+			steps {
+				script {
+
+					step([  $class: 'CopyArtifact',
+							filter: 'Jenkins.zip',
+							fingerprintArtifacts: true,
+							projectName: "RMO/Deployment/Maintenance",
+							target: "BuildForDeploy",
+							selector: [$class: 'SpecificBuildSelector', buildNumber: "${BUILD_NUMBER}"]
+						])
+					unzip dir: 'RMO/Jenkins/', glob: '', zipFile: 'BuildForDeploy/Jenkins.zip'
+					
+					script { wrap([$class: 'BuildUser']) { 
+						EmailFrom="${BUILD_USER_EMAIL}"} 
+					}
+					
+					if (params.ExternalInternal.contains('ExternalMail')) {
+						if (params.Project.contains('RMO')) {
+							if (params.Deploy.contains('ExternalStart')) {
+								emailList="RMOReleaseNotification@nielsen.com, AmericasRMOSupport@nielsen.com, eur_rmosupport@nielsen.com, tcsusrmoops@nielsen.com, eumtenterprisesolutions@nielsen.com, alexey.skorobogatko.consultant@nielsen.com, igor.voytukh.consultant@nielsen.com, rmoappdev@nielsen.com, rmoqa@nielsen.com, oleksii.sreda.consultant@nielsen.com, support@thefullcircle.com, kolinyk.ihor.consultant@nielsen.com, josue.siscooquendo@nielsen.com, dorothy.hall@nielsen.com, gregory.jones@nielsen.com, sam.colalillo@nielsen.com"
+								echo "Sending email to - ${emailList}"
+								
+								mail bcc: "${emailList}", 
+								body: "INTERNAL ONLY\n\n ${env.Project} RELEASE ${BuildFromFTP} - New Day ${env.Environment} Environment Deployment\n This is deployment notification for release ${BuildFromFTP} for ${env.Project}. This deployment will begin in 30 minutes.\n The portal will be down and unavailable for any front or back-end tasks during the deployment period.", 
+								cc: '', 
+								from: "${EmailFrom}", 
+								replyTo: '', 
+								subject: "${env.Project} RELEASE ${BuildFromFTP} - New Day ${env.Environment} Environment Deployment", 
+								to: ''
+							} else {
+								if (params.Deploy.contains('ExternalFinish')) {
+									emailList="RMOReleaseNotification@nielsen.com, AmericasRMOSupport@nielsen.com, eur_rmosupport@nielsen.com, tcsusrmoops@nielsen.com, eumtenterprisesolutions@nielsen.com, alexey.skorobogatko.consultant@nielsen.com, igor.voytukh.consultant@nielsen.com, rmoappdev@nielsen.com, rmoqa@nielsen.com, oleksii.sreda.consultant@nielsen.com, support@thefullcircle.com, kolinyk.ihor.consultant@nielsen.com, josue.siscooquendo@nielsen.com, dorothy.hall@nielsen.com, gregory.jones@nielsen.com, sam.colalillo@nielsen.com"
+									echo "Sending email to - ${emailList}"
+									
+									mail bcc: "${emailList}", 
+									body: "INTERNAL ONLY\n\n ${env.Project} RELEASE ${BuildFromFTP} - New Day ${env.Environment} Environment Deployment\n Deployment is complete for release ${BuildFromFTP} for ${env.Project}. The portal is now back online and updated.", 
+									cc: '', 
+									from: "${EmailFrom}", 
+									replyTo: '', 
+									subject: "${env.Project} RELEASE ${BuildFromFTP} - New Day ${env.Environment} Environment Deployment", 
+									to: ''
+								}
+							}
+						} else {
+							if (params.Deploy.contains('ExternalStart')) {
+								emailList="josue.siscooquendo@nielsen.com, oleksii.sreda.consultant@nielsen.com, alexey.skorobogatko.consultant@nielsen.com, APServiceDelivery@nielsen.com, duncan.hibbard@nielsen.com, elena.zhariy@nielsen.com, igor.voytukh.consultant@nielsen.com"
+								echo "Sending email to - ${emailList}"
+								
+								mail bcc: "${emailList}",  
+								body: "INTERNAL ONLY\n\n ${env.Project} RELEASE ${BuildFromFTP} - New Day ${env.Environment} Environment Deployment\n This is deployment notification for release ${BuildFromFTP} for ${env.Project}. This deployment will begin in 30 minutes.\n The portal will be down and unavailable for any front or back-end tasks during the deployment period.", 
+								cc: '', 
+								from: "${EmailFrom}", 
+								replyTo: '', 
+								subject: "${env.Project} RELEASE ${BuildFromFTP} - New Day ${env.Environment} Environment Deployment", 
+								to: ''
+							} else {
+								if (params.Deploy.contains('ExternalFinish')) {
+									emailList="josue.siscooquendo@nielsen.com, oleksii.sreda.consultant@nielsen.com, alexey.skorobogatko.consultant@nielsen.com, APServiceDelivery@nielsen.com, duncan.hibbard@nielsen.com, elena.zhariy@nielsen.com, igor.voytukh.consultant@nielsen.com"
+									echo "Sending email to - ${emailList}"
+									
+									mail bcc: "${emailList}", 
+									body: "INTERNAL ONLY\n\n ${env.Project} RELEASE ${BuildFromFTP} - New Day ${env.Environment} Environment Deployment\n Deployment is complete for release ${BuildFromFTP} for ${env.Project}. The portal is now back online and updated.", 
+									cc: '', 
+									from: "${EmailFrom}", 
+									replyTo: '', 
+									subject: "${env.Project} RELEASE ${BuildFromFTP} - New Day ${env.Environment} Environment Deployment", 
+									to: ''
+								}
+							}
+						}
+					}
+					if (params.ExternalInternal.contains('InternalForQA')) {
+						if (params.Environment == 'UAT' || params.Environment == 'Production') { 
+							emailList="alexey.skorobogatko.consultant@nielsen.com, igor.voytukh.consultant@nielsen.com, rmoappdev@nielsen.com, rmoqa@nielsen.com, oleksii.sreda.consultant@nielsen.com, duncan.hibbard@nielsen.com, eumtenterprisesolutions@nielsen.com"
+							echo "Sending email to - ${emailList}"
+							
+							mail bcc: "${emailList}",  
+							body: "INTERNAL ONLY\n\n ${env.Project} RELEASE ${BuildFromFTP} - New Day ${env.Environment} Environment Deployment\n Deployment is complete for release ${BuildFromFTP} for ${env.Environment}. The portal is now back online and updated.\n QA Team can proceed with testing.", 
+							cc: '', 
+							from: "${EmailFrom}", 
+							replyTo: '', 
+							subject: "${env.Project} RELEASE ${BuildFromFTP} - New Day ${env.Environment} Environment Deployment", 
+							to: ''
+						} else {
+							emailList="alexey.skorobogatko.consultant@nielsen.com, igor.voytukh.consultant@nielsen.com, rmoappdev@nielsen.com, rmoqa@nielsen.com, oleksii.sreda.consultant@nielsen.com, duncan.hibbard@nielsen.com"
+							echo "Sending email to - ${emailList}"
+							
+							mail bcc: "${emailList}",  
+							body: "INTERNAL ONLY\n\n ${env.Project} RELEASE ${BuildFromFTP} - New Day ${env.Environment} Environment Deployment\n Deployment is complete for release ${BuildFromFTP} for ${env.Environment}. The portal is now back online and updated.\n QA Team can proceed with testing.", 
+							cc: '', 
+							from: "${EmailFrom}", 
+							replyTo: '', 
+							subject: "${env.Project} RELEASE ${BuildFromFTP} - New Day ${env.Environment} Environment Deployment", 
+							to: ''
+						}
+					}
+					
+					
+				}
+			}
+		}
+		
+		stage ('AzureInsight') {
+			when {  expression { AzureInsight == 'AzureInsight_OK' }  }
+			steps {
+				parallel (
+				one: {
+				node("${web01}") { 
+					script {
+						step([  $class: 'CopyArtifact',
+							filter: 'Jenkins.zip',
+							fingerprintArtifacts: true,
+							projectName: "RMO/Deployment/Maintenance",
+							target: "BuildForDeploy",
+							selector: [$class: 'SpecificBuildSelector', buildNumber: "${BUILD_NUMBER}"]
+						])
+						unzip dir: 'RMO/Jenkins/', glob: '', zipFile: 'BuildForDeploy/Jenkins.zip'
+						powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Builds\\CleanWS.ps1"
+						powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Deploys\\AzureDeploy.ps1"
+					}
+				}},
+				two: {
+				node("${web02}") {
+					script {
+						step([  $class: 'CopyArtifact',
+							filter: 'Jenkins.zip',
+							fingerprintArtifacts: true,
+							projectName: "RMO/Deployment/Maintenance",
+							target: "BuildForDeploy",
+							selector: [$class: 'SpecificBuildSelector', buildNumber: "${BUILD_NUMBER}"]
+						])
+						unzip dir: 'RMO/Jenkins/', glob: '', zipFile: 'BuildForDeploy/Jenkins.zip'
+						powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Builds\\CleanWS.ps1"
+						powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Deploys\\AzureDeploy.ps1"
+					}
+				}},
+				three: {
+				node("${web03}") {
+					script {
+						step([  $class: 'CopyArtifact',
+							filter: 'Jenkins.zip',
+							fingerprintArtifacts: true,
+							projectName: "RMO/Deployment/Maintenance",
+							target: "BuildForDeploy",
+							selector: [$class: 'SpecificBuildSelector', buildNumber: "${BUILD_NUMBER}"]
+						])
+						unzip dir: 'RMO/Jenkins/', glob: '', zipFile: 'BuildForDeploy/Jenkins.zip'
+						powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Builds\\CleanWS.ps1"
+						powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Deploys\\AzureDeploy.ps1"
+					}
+				}}
+				)	
+			}
+		}
+		
+		stage ('RMOClose') {
+			when {  expression { RMOClose == 'RMO_OK' }  }
+			steps {
+				parallel (
+				one: {
+				node("${web01}") { 
+					script {
+						step([  $class: 'CopyArtifact',
+							filter: 'Jenkins.zip',
+							fingerprintArtifacts: true,
+							projectName: "RMO/Deployment/Maintenance",
+							target: "BuildForDeploy",
+							selector: [$class: 'SpecificBuildSelector', buildNumber: "${BUILD_NUMBER}"]
+						])
+						unzip dir: 'RMO/Jenkins/', glob: '', zipFile: 'BuildForDeploy/Jenkins.zip'
+						powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Builds\\CleanWS.ps1"
+						if (params.RMOPortal.contains('Close')) {
+							powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Deploys\\OfflineSite.ps1"
+						}
+						if (params.RMOPortal.contains('Open')) {
+							powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Deploys\\OnlineSite.ps1"
+						}
+					}
+				}},
+				two: {
+				node("${web02}") {
+					script {
+						step([  $class: 'CopyArtifact',
+							filter: 'Jenkins.zip',
+							fingerprintArtifacts: true,
+							projectName: "RMO/Deployment/Maintenance",
+							target: "BuildForDeploy",
+							selector: [$class: 'SpecificBuildSelector', buildNumber: "${BUILD_NUMBER}"]
+						])
+						unzip dir: 'RMO/Jenkins/', glob: '', zipFile: 'BuildForDeploy/Jenkins.zip'
+						powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Builds\\CleanWS.ps1"
+						if (params.RMOPortal.contains('Close')) {
+							powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Deploys\\OfflineSite.ps1"
+						}
+						if (params.RMOPortal.contains('Open')) {
+							powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Deploys\\OnlineSite.ps1"
+						}
+					}
+				}},
+				three: {
+				node("${web03}") {
+					script {
+						step([  $class: 'CopyArtifact',
+							filter: 'Jenkins.zip',
+							fingerprintArtifacts: true,
+							projectName: "RMO/Deployment/Maintenance",
+							target: "BuildForDeploy",
+							selector: [$class: 'SpecificBuildSelector', buildNumber: "${BUILD_NUMBER}"]
+						])
+						unzip dir: 'RMO/Jenkins/', glob: '', zipFile: 'BuildForDeploy/Jenkins.zip'
+						powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Builds\\CleanWS.ps1"
+						if (params.RMOPortal.contains('Close')) {
+							powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Deploys\\OfflineSite.ps1"
+						}
+						if (params.RMOPortal.contains('Open')) {
+							powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Deploys\\OnlineSite.ps1"
+						}
+					}
+				}}
+				)	
+			}
+		}
+		
+		stage ('ArtemisClose') {
+			when {  expression { ArtemisClose == 'Artemis_OK' }  }
+//			agent { label "${artemis}"  }
+			steps {
+			node("${artemis}") {
+				script {
+					step([  $class: 'CopyArtifact',
+							filter: 'Jenkins.zip',
+							fingerprintArtifacts: true,
+							projectName: "RMO/Deployment/Maintenance",
+							target: "BuildForDeploy",
+							selector: [$class: 'SpecificBuildSelector', buildNumber: "${BUILD_NUMBER}"]
+						])
+					unzip dir: 'RMO/Jenkins/', glob: '', zipFile: 'BuildForDeploy/Jenkins.zip'
+					powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Builds\\CleanWS.ps1"
+					if (params.RMOPortal.contains('Close')) {
+						powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Deploys\\OfflineSiteArtemis.ps1"
+					}
+					if (params.RMOPortal.contains('Open')) {
+						powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Deploys\\OnlineSiteArtemis.ps1"
+					}
+				}
+			}}
+		}
+		
+		stage ('CopyLog') {
+			agent { label "${rmomaster}"  }
+			steps {
+				script {
+					powershell '''$pathsource="Microsoft.PowerShell.Core\\FileSystem::\\\\DAYRMOsrdsvc61\\c$\\Program Files (x86)\\Jenkins\\jobs\\RMO\\jobs\\Deployment\\jobs\\Maintenance\\builds\\$env:BUILD_NUMBER\\log"
+						$pathdestination="$env:WORKSPACE\\logs"
+						$isfile = Test-Path $pathdestination 
+						if(!$isfile) { 
+							New-Item $pathdestination -type directory 
+						}
+						Copy-Item -Path $pathsource -Destination $pathdestination -Force -verbose'''
+				}	
+			}
+		}
+
+		stage ('ParseLog') {
+			agent { label "${rmomaster}"  }
+			steps {
+				script {
+					powershell returnStatus: true, script: "\\\\rmo-apps\\fs\\SaaS\\Releases\\RMO_Deployment\\NEWDAY\\JenkinsScenario\\Deploys\\parselogMail.ps1"
+				}
+			}
+		}
+		
+	}
+}

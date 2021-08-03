@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "mysql.fullname" . }}
+  name: {{ template "mysql.fullname" . }}-deployment
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "mysql.fullname" . }}

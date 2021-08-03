@@ -1,5 +1,19 @@
 [jenkins]
 jenkins_server ansible_host=3.19.255.17
 
+[masters]
+master ansible_host=18.118.128.244
+
+[workers]
+worker1 ansible_host=18.223.241.173
+worker2 ansible_host=3.142.210.28
+
+[masters_all]
+master_all ansible_host=13.58.7.86
+
+[workers_all]
+worker1_all ansible_host=18.219.4.224
+worker2_all ansible_host=18.221.135.150
+
 [all:vars]
 ansible_python_interpreter=/usr/bin/python3

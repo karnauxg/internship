@@ -9,6 +9,11 @@ ARG redmineUSER=redmine
 ARG redminePASS=redmine
 ARG dbhost=localhost
 
+ENV redmineDB=redmine
+ENV redmineUSER=redmine
+ENV redminePASS=redmine
+ENV dbhost=localhost
+
 COPY ./installRVM_docker.sh installRVM.sh
 RUN sh installRVM.sh
 

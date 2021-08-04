@@ -1,19 +1,19 @@
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: ivoitukh/redmine
   pullPolicy: IfNotPresent
-  tag: 8
+  tag: 10
 
 service:
   type: NodePort
   port: 3000
   nodePort: 30002
-  targetPort: 3000
+  targetPort: 30002
   containerPort: 3000
 
 db:
   redmineUSER: redmine
-  dbhost: 10.100.24.205
+  dbhost: 10.100.86.177
   redminePASS: secret
   redmineDB: redmineDB

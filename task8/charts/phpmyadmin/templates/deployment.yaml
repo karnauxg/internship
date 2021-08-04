@@ -26,13 +26,5 @@ spec:
               value: {{ .Values.db.dbhost | quote }}
             - name: MYSQL_ROOT_PASSWORD
               value: {{ .Values.db.pass | quote }}
-          # livenessProbe:
-          #   httpGet:
-          #     path: {{ .Values.livenessProbe.path }}
-          #     port: {{ .Values.service.targetPort }}
-          # readinessProbe:
-          #   httpGet:
-          #     path: {{ .Values.livenessProbe.path }}
-          #     port: {{ .Values.service.targetPort }}
 
 

@@ -14,7 +14,7 @@ service:
 db:
   port: 3306
 # chartName is - IP service
-  dbhost: 10.100.24.205
+  dbhost: 10.100.86.177
   pass: redmine_root
 # login - root
 # pass - above

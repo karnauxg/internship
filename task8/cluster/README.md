@@ -12,7 +12,7 @@ doc - https://www.digitalocean.com/community/tutorials/how-to-create-a-kubernete
 
 ### deploy dashboard 
 https://github.com/kubernetes/dashboard
-To get assecc from outside (NodePort) - https://github.com/kubernetes/dashboard/blob/master/docs/user/accessing-dashboard/README.md
+To get access from outside (NodePort) - https://github.com/kubernetes/dashboard/blob/master/docs/user/accessing-dashboard/README.md
 
 1. kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.3.1/aio/deploy/recommended.yaml
 - kubectl get pods -A

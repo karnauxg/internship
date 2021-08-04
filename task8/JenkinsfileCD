@@ -1,0 +1,47 @@
+properties([
+    pipelineTriggers([githubPush()]),
+    disableConcurrentBuilds(),
+    buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')), 
+])
+
+pipeline {
+	// agent { label "host"  }
+	options { 
+		disableConcurrentBuilds() 
+		skipDefaultCheckout ()
+	}
+    stages {
+		stage("BuildRedmine") {
+			agent { label "iv-kmaster"  }
+			steps {
+                cleanWs disableDeferredWipeout: true, deleteDirs: true
+                echo "*** Git Clone start ***"
+				script {
+                    checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: "main"]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CleanBeforeCheckout'], [$class: 'RelativeTargetDirectory', relativeTargetDir: "Deploy"]], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/karnauxg/internship.git']]]
+                
+                    echo "*** Git Clone finished ***"
+
+                    def namepsace="dev"
+                    sh "helm install mysql-redmine charts/mysql/ -n redmine"
+                    sh "helm install redmine charts/redmine/ -n redmine"
+                    
+                    sleep 30 
+                }
+            }
+        }
+
+        stage('TestRedmine') {
+            agent { label "iv-kmaster"  }
+            steps {
+                sh "docker ps -a"
+                echo "*** Get html-code 200 from Redmine ***"
+                sh '''IPAddress=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' redminesrv) && codehtml=$(curl -o /dev/null -s -w "%{http_code}" http://$IPAddress:3000)
+                    if [ "$codehtml" -eq "200" ]; 
+                        then touch /var/jenkins_home/workspace/${JOB_NAME}/200.csv
+                    fi'''
+             }
+        }
+
+    }
+}
+

@@ -7,14 +7,17 @@
 ## Deploy via kubectl
 1. kubectl apply -f yml/phpmyadmin/deployment.yml -n redmine
 > kubectl apply -f yml/phpmyadmin/service.yml -n redmine
+> kubectl replace -f nginx.yaml
 
 
+## Maintenance
+1. kubectl get pod redmine-deployment-7c7fd666d4-hgbpt -n redmine -o yaml
+2. kubectl attach redmine-deployment-7c7fd666d4-hgbpt -i -n redmine
+3. kubectl -n redmine exec redmine-deployment-7c7fd666d4-hgbpt -- ls /var/redmine
 
 
-
-
-2. kubectl create -f ./secret.yaml -n redmine
-3. helm dependency list charts/phpmyadmin
+## Monitoring
+1. 
 
 
 ### Deploy Redmin

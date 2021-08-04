@@ -11,7 +11,7 @@ pipeline {
 		skipDefaultCheckout ()
 	}
     stages {
-		stage("BuildRedmine") {
+		stage("DeployRedmine") {
 			agent { label "iv-kmaster"  }
 			steps {
                 cleanWs disableDeferredWipeout: true, deleteDirs: true
@@ -21,26 +21,23 @@ pipeline {
                 
                     echo "*** Git Clone finished ***"
 
-                    def namepsace="dev"
-                    sh "helm install mysql-redmine charts/mysql/ -n redmine"
-                    sh "helm install redmine charts/redmine/ -n redmine"
+                    sh "cd /var/jenkins_home/workspace/${JOB_NAME}/Deploy/task8/build && helm install mysql-redmine charts/mysql/ -n redmine"
+                    sh "cd /var/jenkins_home/workspace/${JOB_NAME}/Deploy/task8/build && helm install redmine charts/redmine/ -n redmine"
+                    sh "cd /var/jenkins_home/workspace/${JOB_NAME}/Deploy/task8/build && helm install phpmyadmin charts/phpmyadmin/ -n redmine"
                     
                     sleep 30 
                 }
             }
         }
 
-        stage('TestRedmine') {
+        stage('CheckrInstall') {
             agent { label "iv-kmaster"  }
             steps {
-                sh "docker ps -a"
-                echo "*** Get html-code 200 from Redmine ***"
-                sh '''IPAddress=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' redminesrv) && codehtml=$(curl -o /dev/null -s -w "%{http_code}" http://$IPAddress:3000)
-                    if [ "$codehtml" -eq "200" ]; 
-                        then touch /var/jenkins_home/workspace/${JOB_NAME}/200.csv
-                    fi'''
+                echo "*** Check helm list ***"
+                sh "helm list -n redmine"
              }
         }
+
 
     }
 }

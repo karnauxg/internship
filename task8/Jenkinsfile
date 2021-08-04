@@ -79,6 +79,7 @@ pipeline {
                         echo "************* After Clean host *****************"
                         sh "docker ps -a"
                         sh "docker images -a"
+                        err=0
                     } catch (exc) {
                         currentBuild.result = 'FAILURE'
                         err="FAILURE"

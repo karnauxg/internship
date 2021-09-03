@@ -5,7 +5,7 @@ properties([
 ])
 
 pipeline {
-	// agent { label "host"  }
+    agent none
 	options { 
 		disableConcurrentBuilds() 
 		skipDefaultCheckout ()
@@ -21,9 +21,9 @@ pipeline {
                 
                     echo "*** Git Clone finished ***"
 
-                    sh "cd /var/jenkins_home/workspace/${JOB_NAME}/Deploy/task8/build && helm install mysql-redmine charts/mysql/ -n redmine"
-                    sh "cd /var/jenkins_home/workspace/${JOB_NAME}/Deploy/task8/build && helm install redmine charts/redmine/ -n redmine"
-                    sh "cd /var/jenkins_home/workspace/${JOB_NAME}/Deploy/task8/build && helm install phpmyadmin charts/phpmyadmin/ -n redmine"
+                    sh "cd /var/jenkins/workspace/${JOB_NAME}/Deploy/task8 && helm install mysql-redmine charts/mysql/ -n redmine"
+                    sh "cd /var/jenkins/workspace/${JOB_NAME}/Deploy/task8 && helm install redmine charts/redmine/ -n redmine"
+                    sh "cd /var/jenkins/workspace/${JOB_NAME}/Deploy/task8 && helm install phpmyadmin charts/phpmyadmin/ -n redmine"
                     
                     sleep 30 
                 }
